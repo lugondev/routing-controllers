@@ -58,6 +58,7 @@ export * from "./decorator/UploadedFiles";
 export * from "./decorator/UseAfter";
 export * from "./decorator/UseBefore";
 export * from "./decorator/UseInterceptor";
+export * from "./decorator/ServerSettings";
 
 export * from "./decorator-options/BodyOptions";
 export * from "./decorator-options/ParamOptions";
@@ -84,11 +85,15 @@ export * from "./metadata/ParamMetadata";
 export * from "./metadata/ResponseHandleMetadata";
 export * from "./metadata/UseMetadata";
 
+export * from "./interfaces/IServerSettings";
+export * from "./metadata-builder/Metadata";
+
 export * from "./RoutingControllersOptions";
 export * from "./CustomParameterDecorator";
 export * from "./RoleChecker";
 export * from "./Action";
 export * from "./InterceptorInterface";
+export * from "./ServerLoader";
 
 export * from "./driver/BaseDriver";
 export * from "./driver/express/ExpressDriver";
