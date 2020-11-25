@@ -85,6 +85,7 @@ export * from "./metadata/ParamMetadata";
 export * from "./metadata/ResponseHandleMetadata";
 export * from "./metadata/UseMetadata";
 
+export * from "./interfaces/ILoader";
 export * from "./interfaces/IServerSettings";
 export * from "./metadata-builder/Metadata";
 

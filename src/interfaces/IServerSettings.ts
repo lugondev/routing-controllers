@@ -1,4 +1,5 @@
 import {RoutingControllersOptions} from "../RoutingControllersOptions";
+import {ILoader} from "./ILoader";
 
 export interface IServerSettings {
     /**
@@ -25,6 +26,10 @@ export interface IServerSettings {
      *
      */
     required?: string[];
+    /**
+     *
+     */
+    loaders?: ILoader[];
 
     /**
      * Load mongooses, for example './models'.

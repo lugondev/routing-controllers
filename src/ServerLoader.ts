@@ -32,6 +32,12 @@ export class ServerLoader implements IServerLoader {
             const start = new Date();
             await this.initServer();
             await this.startServer();
+            if (!!this.settings.loaders && this.settings.loaders.length > 0) {
+                await this.runInSequence(this.settings.loaders, loader => {
+                    const loaderResult = loader();
+                    return loaderResult instanceof Promise ? loaderResult : Promise.resolve();
+                });
+            }
 
             await this.callHook("$onReady");
 
@@ -103,5 +109,22 @@ export class ServerLoader implements IServerLoader {
         }
 
         return elseFn();
+    }
+
+    private runInSequence<T, U>(collection: T[], callback: (item: T) => Promise<U>): Promise<U[]> {
+        const results: U[] = [];
+        return collection
+            .reduce((promise, item) => {
+                return promise
+                    .then(() => {
+                        return callback(item);
+                    })
+                    .then(result => {
+                        results.push(result);
+                    });
+            }, Promise.resolve())
+            .then(() => {
+                return results;
+            });
     }
 }

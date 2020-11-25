@@ -1,1 +1,1 @@
-export const SERVER_SETTINGS = "lugon:server:settings";
+export const SERVER_SETTINGS = "routing-controllers:server:settings";
