@@ -5,7 +5,7 @@ import {$log} from "ts-log-debug";
 import {IServerSettings, IServerLoader} from "./interfaces/IServerSettings";
 import {Metadata} from "./metadata-builder/Metadata";
 import {SERVER_SETTINGS} from "./constants";
-import {useExpressServer} from "./index";
+import {ILoader, useExpressServer} from "./index";
 
 export class ServerLoader implements IServerLoader {
     public project: string;
@@ -15,6 +15,7 @@ export class ServerLoader implements IServerLoader {
 
     constructor() {
         this.settings = Metadata.getOwn(SERVER_SETTINGS, this);
+        this.project = this.settings.project || "Project";
         if (!!this.settings.mongoose) {
             require(this.settings.mongoose);
         }
@@ -25,6 +26,7 @@ export class ServerLoader implements IServerLoader {
         }
         this.createExpressApplication()
             .callHook("$onInit");
+
     }
 
     public async start(): Promise<any> {
@@ -32,12 +34,6 @@ export class ServerLoader implements IServerLoader {
             const start = new Date();
             await this.initServer();
             await this.startServer();
-            if (!!this.settings.loaders && this.settings.loaders.length > 0) {
-                await this.runInSequence(this.settings.loaders, loader => {
-                    const loaderResult = loader();
-                    return loaderResult instanceof Promise ? loaderResult : Promise.resolve();
-                });
-            }
 
             await this.callHook("$onReady");
 
@@ -52,9 +48,9 @@ export class ServerLoader implements IServerLoader {
     protected initServer(): Promise<any> {
         useExpressServer(this.expressApp, this.settings.options || {});
         this.httpServer = Http.createServer(this.expressApp);
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             this.callHook("$onCreateServer", undefined, this.httpServer);
-            resolve();
+            return resolve();
         });
     }
 
@@ -86,6 +82,22 @@ export class ServerLoader implements IServerLoader {
         return this;
     }
 
+    public load(loader: ILoader): ServerLoader {
+        loader(this);
+
+        return this;
+    }
+
+    public loaders(): ServerLoader {
+        if (this.settings.loaders) {
+            this.settings.loaders.forEach(loader => {
+                this.load(loader);
+            });
+        }
+
+        return this;
+    }
+
     public set(setting: string, val: any): ServerLoader {
         this.expressApp.set(setting, val);
 
@@ -109,22 +121,5 @@ export class ServerLoader implements IServerLoader {
         }
 
         return elseFn();
-    }
-
-    private runInSequence<T, U>(collection: T[], callback: (item: T) => Promise<U>): Promise<U[]> {
-        const results: U[] = [];
-        return collection
-            .reduce((promise, item) => {
-                return promise
-                    .then(() => {
-                        return callback(item);
-                    })
-                    .then(result => {
-                        results.push(result);
-                    });
-            }, Promise.resolve())
-            .then(() => {
-                return results;
-            });
     }
 }
