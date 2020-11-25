@@ -107,6 +107,7 @@
     "copy": "copyfiles -u 3 \"build/compiled/src/**/*\" build/package && copyfiles package.json README.md build/package",
     "lint": "tslint --fix --format verbose --project tsconfig.json",
     "package": "npm run build && npm run copy && npm run public && rimraf build/compiled",
+    "publish": "npm publish",
     "pretest": "npm run lint",
     "public": "json -I -f build/package/package.json -e 'this.private=false'",
     "test": "rimraf coverage && cross-env NODE_ENV=test nyc mocha test/**/*.ts"
