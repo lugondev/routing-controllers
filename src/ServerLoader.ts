@@ -82,35 +82,41 @@ export class ServerLoader implements IServerLoader {
         return this;
     }
 
-    async load(loader: ILoader): Promise<ServerLoader> {
+    private async load(loader: ILoader): Promise<any> {
         await loader(this);
-
-        return this;
     }
 
-    private runPromises(tasks: Promise<any>[] | any[]) {
+    private runLoaders(loaders: Promise<any>[] | any[]) {
         let result = Promise.resolve();
-        tasks.forEach(task => {
-            console.log("Run: " + task);
-            result = result.then(() => task());
+        loaders.forEach(loader => {
+            result = result.then(() => this.load(loader));
         });
         return result;
     }
 
+    // async  runPromises(tasks: Promise<any>[]) {
+    //     for(const task of tasks) {
+    //         await readFile(file);
+    //     }
+    // };
+
     public async loaders(oneByOne: boolean = false) {
         if (this.settings.loaders) {
             if (!oneByOne) {
-                this.settings.loaders.forEach(loader => {
-                    this.load(loader).catch(e => {
+                // this.settings.loaders.forEach(loader => {
+                //     this.load(loader).catch(e => {
+                //         console.error("Loader");
+                //         console.log(e);
+                //     });
+                // });
+                return await  Promise.all(this.settings.loaders.map(async loader => {
+                    return await this.load(loader);
+                }));
+            } else {
+                this.runLoaders(this.settings.loaders).catch(e => {
                         console.error("Loader");
                         console.log(e);
-                    });
-                });
-            } else {
-                await this.runPromises(this.settings.loaders).catch(e => {
-                    console.error("Loader");
-                    console.log(e);
-                });
+                }).then();
             }
         }
     }
