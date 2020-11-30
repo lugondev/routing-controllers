@@ -82,20 +82,37 @@ export class ServerLoader implements IServerLoader {
         return this;
     }
 
-    public load(loader: ILoader): ServerLoader {
-        loader(this);
+    async load(loader: ILoader): Promise<ServerLoader> {
+        await loader(this);
 
         return this;
     }
 
-    public loaders(): ServerLoader {
-        if (this.settings.loaders) {
-            this.settings.loaders.forEach(loader => {
-                this.load(loader);
-            });
-        }
+    private runPromises(tasks: Promise<any>[] | any[]) {
+        let result = Promise.resolve();
+        tasks.forEach(task => {
+            console.log("Run: " + task);
+            result = result.then(() => task());
+        });
+        return result;
+    }
 
-        return this;
+    public async loaders(oneByOne: boolean = false) {
+        if (this.settings.loaders) {
+            if (!oneByOne) {
+                this.settings.loaders.forEach(loader => {
+                    this.load(loader).catch(e => {
+                        console.error("Loader");
+                        console.log(e);
+                    });
+                });
+            } else {
+                await this.runPromises(this.settings.loaders).catch(e => {
+                    console.error("Loader");
+                    console.log(e);
+                });
+            }
+        }
     }
 
     public set(setting: string, val: any): ServerLoader {
@@ -104,8 +121,7 @@ export class ServerLoader implements IServerLoader {
         return this;
     }
 
-    public engine(ext: string, fn: Function): ServerLoader {
-        // @ts-ignore
+    public engine(ext: string, fn: (path: string, options: object, callback: (e: any, rendered?: string) => void) => void): ServerLoader {
         this.expressApp.engine(ext, fn);
 
         return this;
