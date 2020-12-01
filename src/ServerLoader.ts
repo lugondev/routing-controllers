@@ -24,10 +24,11 @@ export class ServerLoader implements IServerLoader {
                 require(pack);
             });
         }
-        this.callHookCallback("$beforeInit", () => {
-            this.createExpressApplication()
-                .callHook("$onInit");
-        });
+        this.callHookCallback("$beforeInit")
+            .then(() => {
+                this.createExpressApplication()
+                    .callHook("$onInit");
+            });
 
     }
 
@@ -145,13 +146,13 @@ export class ServerLoader implements IServerLoader {
         return elseFn();
     }
 
-    private callHookCallback(key: string, callback = new Function(), ...args: any[]) {
+    private async callHookCallback(key: string, callback = new Function(), ...args: any[]) {
         const self: any = this;
 
         if (key in this) {
             $log.debug(`Call hook ${key}`);
 
-            return self[key](callback, ...args);
+            return self[key](...args).then(callback);
         }
 
         return callback();
