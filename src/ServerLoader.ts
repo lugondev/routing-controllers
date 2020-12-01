@@ -24,18 +24,19 @@ export class ServerLoader implements IServerLoader {
                 require(pack);
             });
         }
-        this.callHookCallback("$beforeInit")
-            .then(() => {
-                $log.info("Create express application");
-                this.createExpressApplication()
-                    .callHook("$onInit");
-            });
 
     }
 
     public async start(): Promise<any> {
         try {
             const start = new Date();
+            await this.callHookCallback("$beforeInit")
+                .then(() => {
+                    $log.info("Create express application");
+                    this.createExpressApplication()
+                        .callHook("$onInit");
+                });
+
             await this.initServer();
             await this.startServer();
 
