@@ -24,8 +24,12 @@ export class ServerLoader implements IServerLoader {
                 require(pack);
             });
         }
-        this.createExpressApplication()
-            .callHook("$onInit");
+        this.callHook("$beforeInit", () => {
+            this.createExpressApplication()
+                .callHook("$onInit", () => {
+                    this.callHook("$afterInit");
+                });
+        });
 
     }
 
@@ -46,6 +50,7 @@ export class ServerLoader implements IServerLoader {
     }
 
     protected initServer(): Promise<any> {
+        this.callHook("$beforeCreateServer");
         useExpressServer(this.expressApp, this.settings.options || {});
         this.httpServer = Http.createServer(this.expressApp);
         return new Promise((resolve) => {
@@ -86,7 +91,7 @@ export class ServerLoader implements IServerLoader {
         await loader(this);
     }
 
-    private runLoaders(loaders: Promise<any>[] | any[]) {
+    private runPromisesLoaders(loaders: Promise<any>[] | any[]) {
         let result = Promise.resolve();
         loaders.forEach(loader => {
             result = result.then(() => this.load(loader));
@@ -94,29 +99,26 @@ export class ServerLoader implements IServerLoader {
         return result;
     }
 
-    // async  runPromises(tasks: Promise<any>[]) {
-    //     for(const task of tasks) {
-    //         await readFile(file);
-    //     }
-    // };
-
-    public async loaders(oneByOne: boolean = false) {
-        if (this.settings.loaders) {
+    public async loaders(oneByOne: boolean = false): Promise<any> {
+        if (this.settings.loaders && this.settings.loaders.length > 0) {
             if (!oneByOne) {
-                // this.settings.loaders.forEach(loader => {
-                //     this.load(loader).catch(e => {
-                //         console.error("Loader");
-                //         console.log(e);
-                //     });
-                // });
-                return await  Promise.all(this.settings.loaders.map(async loader => {
+                return await Promise.all(this.settings.loaders.map(async loader => {
                     return await this.load(loader);
                 }));
             } else {
-                this.runLoaders(this.settings.loaders).catch(e => {
-                        console.error("Loader");
-                        console.log(e);
-                }).then();
+                return await this.runPromisesLoaders(this.settings.loaders);
+            }
+        }
+    }
+
+    public async runLoaders(loaders: ILoader[], oneByOne: boolean = false): Promise<any> {
+        if (loaders && loaders.length > 0) {
+            if (!oneByOne) {
+                return await Promise.all(loaders.map(async loader => {
+                    return await this.load(loader);
+                }));
+            } else {
+                return await this.runPromisesLoaders(loaders);
             }
         }
     }

@@ -42,7 +42,13 @@ export interface IServerSettings {
 export interface IServerLoader {
     project: any;
 
+    $beforeInit?(): Function;
+
     $onInit?(): Function;
+
+    $afterInit?(): Function;
+
+    $beforeCreateServer?(): Function;
 
     $onCreateServer?(): Function;
 
