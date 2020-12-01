@@ -26,6 +26,7 @@ export class ServerLoader implements IServerLoader {
         }
         this.callHookCallback("$beforeInit")
             .then(() => {
+                $log.info("Create express application");
                 this.createExpressApplication()
                     .callHook("$onInit");
             });
@@ -150,7 +151,7 @@ export class ServerLoader implements IServerLoader {
         const self: any = this;
 
         if (key in this) {
-            $log.debug(`Call hook ${key}`);
+            $log.debug(`Call hook callback ${key}`);
 
             return self[key](...args).then(callback);
         }
