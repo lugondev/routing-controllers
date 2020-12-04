@@ -50,6 +50,8 @@ export interface IServerLoader {
 
     $onCreateServer?(): Function;
 
+    $onCreatedServer?(): Function;
+
     $onReady?(): Function;
 
     $onServerInitError?(error: any): Function;
