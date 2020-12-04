@@ -43,6 +43,7 @@ export class ServerLoader implements IServerLoader {
             await this.callHook("$onReady");
 
             $log.info(`Started in ${new Date().getTime() - start.getTime()} ms`);
+            return this;
         } catch (err) {
             this.callHook("$onServerInitError", undefined, err);
 
@@ -73,7 +74,12 @@ export class ServerLoader implements IServerLoader {
 
         this.httpServer.listen(port, this.httpServer.address() as any);
 
-        return promise;
+        return promise.then(_ => {
+            return new Promise((resolve) => {
+                this.callHook("$onCreatedServer", undefined, this.httpServer);
+                return resolve();
+            });
+        });
     }
 
     private createExpressApplication(): ServerLoader {

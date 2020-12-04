@@ -6,23 +6,9 @@
   "license": "MIT",
   "readmeFilename": "README.md",
   "author": {
-    "name": "Umed Khudoiberdiev",
-    "email": "pleerock.me@gmail.com"
+    "name": "Remake and update by Lugon",
+    "email": "lugondev@gmail.com"
   },
-  "contributors": [
-    {
-      "name": "Michał Lytek",
-      "url": "https://github.com/19majkel94"
-    },
-    {
-      "name": "Jonathas Morais",
-      "url": "https://github.com/jotamorais"
-    },
-    {
-      "name": "adenhertog",
-      "url": "https://github.com/adenhertog"
-    }
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/typestack/routing-controllers.git"
